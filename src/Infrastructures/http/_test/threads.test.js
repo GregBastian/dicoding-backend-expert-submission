@@ -7,6 +7,7 @@ const ServerTestHelper = require('../../../../tests/ServerTestHelper');
 const injections = require('../../injections');
 const createServer = require('../createServer');
 const RepliesTableTestHelper = require('../../../../tests/RepliesTableTestHelper');
+const LikesTableTestHelper = require('../../../../tests/LikesTableTestHelper');
 
 describe('endpoints concerning CRUD on threads', () => {
   afterEach(async () => {
@@ -149,6 +150,7 @@ describe('endpoints concerning CRUD on threads', () => {
       await CommentsTableTestHelper.addComment({ id: 'comment-456', threadId, owner: 'user-123' });
       await RepliesTableTestHelper.addReply({ id: 'reply-123', commentId: 'comment-456', owner: 'user-123' });
       await RepliesTableTestHelper.addReply({ id: 'reply-456', commentId: 'comment-123', owner: 'user-456' });
+      await LikesTableTestHelper.addLike({ id: 'like-123', commentId: 'comment-123', owner: 'user-123' });
 
       // action
       const response = await server.inject({
@@ -164,6 +166,8 @@ describe('endpoints concerning CRUD on threads', () => {
       expect(responseJson.data.thread.comments).toHaveLength(2);
       expect(responseJson.data.thread.comments[0].replies).toHaveLength(1);
       expect(responseJson.data.thread.comments[1].replies).toHaveLength(1);
+      expect(responseJson.data.thread.comments[0].likeCount).toEqual(1);
+      expect(responseJson.data.thread.comments[1].likeCount).toEqual(0);
     });
 
     it('should respond with 200 and with thread details with empty comments', async () => {

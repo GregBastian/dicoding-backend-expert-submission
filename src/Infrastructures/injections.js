@@ -15,6 +15,7 @@ const AuthenticationRepositoryPostgres = require('./repository/AuthenticationRep
 const ThreadRepositoryPostgres = require('./repository/ThreadRepositoryPostgres');
 const CommentRepositoryPostgres = require('./repository/CommentRepositoryPostgres');
 const ReplyRepositoryPostgres = require('./repository/ReplyRepositoryPostgres');
+const LikeRepositoryPostgres = require('./repository/LikeRepositoryPostgres');
 const BcryptEncryptionHelper = require('./security/BcryptEncryptionHelper');
 const JwtTokenManager = require('./security/JwtTokenManager');
 
@@ -29,6 +30,7 @@ const DeleteCommentUseCase = require('../Applications/use_case/DeleteCommentUseC
 const GetThreadUseCase = require('../Applications/use_case/GetThreadUseCase');
 const AddReplyUseCase = require('../Applications/use_case/AddReplyUseCase');
 const DeleteReplyUseCase = require('../Applications/use_case/DeleteReplyUseCase');
+const AddLikeUseCase = require('../Applications/use_case/AddLikeUseCase');
 
 const serviceInstanceContainer = {
   userRepository: new UserRepositoryPostgres(pool, nanoid),
@@ -38,6 +40,7 @@ const serviceInstanceContainer = {
   threadRepository: new ThreadRepositoryPostgres(pool, nanoid, date),
   commentRepository: new CommentRepositoryPostgres(pool, nanoid, date),
   replyRepository: new ReplyRepositoryPostgres(pool, nanoid, date),
+  likeRepository: new LikeRepositoryPostgres(pool, nanoid),
 };
 
 const useCaseInstanceContainer = {
@@ -74,6 +77,7 @@ const useCaseInstanceContainer = {
   getThreadUseCase: new GetThreadUseCase({
     threadRepository: serviceInstanceContainer.threadRepository,
     commentRepository: serviceInstanceContainer.commentRepository,
+    likeRepository: serviceInstanceContainer.likeRepository,
   }),
   addReplyUseCase: new AddReplyUseCase({
     threadRepository: serviceInstanceContainer.threadRepository,
@@ -83,6 +87,11 @@ const useCaseInstanceContainer = {
   }),
   deleteReplyUseCase: new DeleteReplyUseCase({
     replyRepository: serviceInstanceContainer.replyRepository,
+    authenticationTokenManager: serviceInstanceContainer.authenticationTokenManager,
+  }),
+  addLikeUseCase: new AddLikeUseCase({
+    commentRepository: serviceInstanceContainer.commentRepository,
+    likeRepository: serviceInstanceContainer.likeRepository,
     authenticationTokenManager: serviceInstanceContainer.authenticationTokenManager,
   }),
 };
