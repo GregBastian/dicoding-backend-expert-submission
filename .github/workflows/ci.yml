@@ -5,7 +5,7 @@ on:
     branches:
       - submission-2
       - submission-2-ci
-      - master
+      - main
  
 jobs:
   test:
