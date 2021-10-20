@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - submission-2-ci
+      - submission-2
       - master
  
 jobs:
