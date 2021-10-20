@@ -120,7 +120,7 @@ describe('ReplyRepositoryPostgres', () => {
 
         await RepliesTableTestHelper.addReply({});
 
-        expect(replyRepositoryPostgres.deleteReplyById('reply-123'))
+        await expect(replyRepositoryPostgres.deleteReplyById('reply-123'))
           .resolves.toBeUndefined();
       });
 

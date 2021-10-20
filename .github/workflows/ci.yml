@@ -4,7 +4,8 @@ on:
   pull_request:
     branches:
       - submission-2
-      - master
+      - submission-2-ci
+      - main
  
 jobs:
   test:
