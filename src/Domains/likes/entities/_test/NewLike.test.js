@@ -5,7 +5,6 @@ describe('a NewLike entity', () => {
     // arrange
     const payload = {
       commentId: 'comment-123',
-      owner: 'fake-user',
     };
 
     // action & assert
