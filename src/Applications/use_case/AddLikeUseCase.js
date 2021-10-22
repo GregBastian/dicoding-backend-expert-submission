@@ -18,7 +18,12 @@ class AddLikeUseCase {
     const newLike = new NewLike({
       commentId: useCaseParam.commentId, owner,
     });
-    return this._likeRepository.addLike(newLike);
+
+    if (await this._likeRepository.checkLikeIsExists(newLike)) {
+      await this._likeRepository.deleteLikeByCommentIdAndOwner(newLike);
+    } else {
+      await this._likeRepository.addLike(newLike);
+    }
   }
 }
 

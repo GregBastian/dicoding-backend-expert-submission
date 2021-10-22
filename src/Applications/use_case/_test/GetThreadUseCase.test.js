@@ -29,6 +29,7 @@ describe('GetThreadDetailUseCase', () => {
         date: '2021',
         content: 'comment A',
         replies: [],
+        isDeleted: false,
         likeCount: 0,
       }),
       new DetailComment({
@@ -37,6 +38,7 @@ describe('GetThreadDetailUseCase', () => {
         date: '2020',
         content: 'comment B',
         replies: [],
+        isDeleted: false,
         likeCount: 0,
       }),
     ];
@@ -48,6 +50,7 @@ describe('GetThreadDetailUseCase', () => {
         content: 'reply A',
         date: '2021',
         username: 'user C',
+        isDeleted: false,
       }),
       new DetailReply({
         id: 'reply-456',
@@ -55,6 +58,7 @@ describe('GetThreadDetailUseCase', () => {
         content: 'reply B',
         date: '2021',
         username: 'user D',
+        isDeleted: false,
       }),
     ];
 

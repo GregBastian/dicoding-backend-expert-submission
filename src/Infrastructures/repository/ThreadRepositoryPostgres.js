@@ -44,7 +44,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
   async getRepliesByThreadId(id) {
     const query = {
       text: `SELECT replies.id, comments.id AS comment_id, 
-              CASE WHEN replies.is_deleted = TRUE THEN '**balasan telah dihapus**' else replies.content END AS content, 
+              replies.is_deleted, replies.content, 
               replies.date, users.username 
               FROM replies 
               INNER JOIN comments ON replies.comment_id = comments.id
@@ -55,7 +55,9 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     };
 
     const result = await this._pool.query(query);
-    return result.rows.map((entry) => new DetailReply({ ...entry, commentId: entry.comment_id }));
+    return result.rows.map((entry) => new DetailReply({
+      ...entry, commentId: entry.comment_id, isDeleted: entry.is_deleted,
+    }));
   }
 }
 

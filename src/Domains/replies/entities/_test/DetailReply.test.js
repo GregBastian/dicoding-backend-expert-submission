@@ -20,6 +20,7 @@ describe('a DetailReply entity', () => {
       content: 145,
       date: {},
       username: {},
+      isDeleted: 0,
     };
 
     // action & assert
@@ -33,6 +34,7 @@ describe('a DetailReply entity', () => {
       content: 'some reply',
       date: '2021',
       username: 'John Doe',
+      isDeleted: false,
     };
 
     const addedReply = new DetailReply(payload);
@@ -40,5 +42,6 @@ describe('a DetailReply entity', () => {
     expect(addedReply.content).toEqual(payload.content);
     expect(addedReply.date).toEqual(payload.date);
     expect(addedReply.username).toEqual(payload.username);
+    expect(addedReply.is_deleted).toEqual(payload.is_deleted);
   });
 });
