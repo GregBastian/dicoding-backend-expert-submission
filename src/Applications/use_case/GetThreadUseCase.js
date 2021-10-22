@@ -13,13 +13,17 @@ class getThreadUseCase {
     const threadReplies = await this._threadRepository.getRepliesByThreadId(threadId);
 
     for (let i = 0; i < threadDetail.comments.length; i += 1) {
-      const commentId = threadDetail.comments[i].id;
+      // modify comment content based on is_deleted status
+      threadDetail.comments[i].content = threadDetail.comments[i].isDeleted ? '**komentar telah dihapus**' : threadDetail.comments[i].content;
+      delete threadDetail.isDeleted;
 
       // get replies
+      const commentId = threadDetail.comments[i].id;
       threadDetail.comments[i].replies = threadReplies
         .filter((reply) => reply.commentId === commentId)
         .map((reply) => {
           const { commentId, ...replyDetail } = reply;
+          replyDetail.content = replyDetail.isDeleted ? '**balasan telah dihapus**' : replyDetail.content;
           return replyDetail;
         });
 

@@ -33,7 +33,6 @@ describe('AddReplyUseCase', () => {
     });
 
     /** creating dependancies for use case */
-    const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
     const mockReplyRepository = new ReplyRepository();
     const mockAuthenticationTokenManager = new AuthenticationTokenManager();
@@ -54,7 +53,6 @@ describe('AddReplyUseCase', () => {
 
     /** creating use case instance */
     const addReplyUseCase = new AddReplyUseCase({
-      threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
       replyRepository: mockReplyRepository,
       authenticationTokenManager: mockAuthenticationTokenManager,

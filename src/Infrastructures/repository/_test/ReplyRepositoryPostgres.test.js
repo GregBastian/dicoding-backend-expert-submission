@@ -72,17 +72,17 @@ describe('ReplyRepositoryPostgres', () => {
 
         await RepliesTableTestHelper.addReply({});
 
-        expect(replyRepositoryPostgres.checkReplyIsExist({
+        await expect(replyRepositoryPostgres.checkReplyIsExist({
           threadId: 'thread-123',
           commentId: 'comment-123',
           replyId: 'reply-123',
-        })).resolves.toBeUndefined();
+        })).resolves.not.toThrowError();
       });
 
       it('should throw error if reply does not exist', async () => {
         const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {}, {});
 
-        expect(replyRepositoryPostgres.checkReplyIsExist({
+        await expect(replyRepositoryPostgres.checkReplyIsExist({
           threadId: 'thread-123',
           commentId: 'comment-123',
           replyId: 'reply-789',
@@ -96,7 +96,7 @@ describe('ReplyRepositoryPostgres', () => {
 
         await RepliesTableTestHelper.addReply({});
 
-        expect(replyRepositoryPostgres.verifyReplyAccess({
+        await expect(replyRepositoryPostgres.verifyReplyAccess({
           ownerId: 'user-123',
           replyId: 'reply-123',
         })).resolves.toBeUndefined();
@@ -107,7 +107,7 @@ describe('ReplyRepositoryPostgres', () => {
 
         await RepliesTableTestHelper.addReply({});
 
-        expect(replyRepositoryPostgres.verifyReplyAccess({
+        await expect(replyRepositoryPostgres.verifyReplyAccess({
           ownerId: 'user-456',
           replyId: 'reply-123',
         })).rejects.toThrowError('Anda tidak berhak melakukan aksi tersebut pada reply ini');
@@ -137,7 +137,7 @@ describe('ReplyRepositoryPostgres', () => {
       it('should throw error when reply has been already deleted', async () => {
         const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {}, {});
 
-        expect(replyRepositoryPostgres.deleteReplyById('reply-123'))
+        await expect(replyRepositoryPostgres.deleteReplyById('reply-123'))
           .rejects.toThrowError('reply yang ingin Anda hapus tidak ada');
       });
     });

@@ -6,6 +6,7 @@ const NewComment = require('../../../Domains/comments/entities/NewComment');
 const AddedComment = require('../../../Domains/comments/entities/AddedComment');
 const pool = require('../../database/postgres/pool');
 const CommentRepositoryPostgres = require('../CommentRepositoryPostgres');
+const DetailComment = require('../../../Domains/comments/entities/DetailComment');
 
 describe('CommentRepositoryPostgres', () => {
   it('should be instance of CommentRepository domain', () => {
@@ -98,10 +99,10 @@ describe('CommentRepositoryPostgres', () => {
     describe('getCommentsByThreadId', () => {
       it('should return all comments from a thread', async () => {
         const firstComment = {
-          id: 'comment-123', date: '2020', content: 'first comment',
+          id: 'comment-123', date: '2020', content: 'first comment', isDeleted: false, replies: [], likeCount: 0,
         };
         const secondComment = {
-          id: 'comment-456', date: '2022', content: 'second comment',
+          id: 'comment-456', date: '2022', content: 'second comment', isDeleted: false, replies: [], likeCount: 0,
         };
         await CommentsTableTestHelper.addComment(firstComment);
         await CommentsTableTestHelper.addComment(secondComment);
@@ -111,7 +112,9 @@ describe('CommentRepositoryPostgres', () => {
 
         const commentDetails = await commentRepositoryPostgres.getCommentsByThreadId('thread-123');
         expect(commentDetails).toEqual([
-          { ...firstComment, username: 'SomeUser' }, { ...secondComment, username: 'SomeUser' }]);
+          new DetailComment({ ...firstComment, username: 'SomeUser' }),
+          new DetailComment({ ...secondComment, username: 'SomeUser' }),
+        ]);
       });
 
       it('should return an empty array when no comments exist for the thread', async () => {
@@ -135,7 +138,7 @@ describe('CommentRepositoryPostgres', () => {
         );
 
         await expect(commentRepositoryPostgres.checkCommentIsExist({ threadId: 'thread-123', commentId: 'comment-123' }))
-          .resolves.toBeUndefined();
+          .resolves.not.toThrowError();
       });
 
       it('should reject if comment does not exist', async () => {

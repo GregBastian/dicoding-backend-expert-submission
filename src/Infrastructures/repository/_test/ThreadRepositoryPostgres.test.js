@@ -118,10 +118,10 @@ describe('ThreadRepositoryPostgres', () => {
         await CommentsTableTestHelper.addComment({ id: 'comment-456', owner: 'user-456', threadId: 'thread-123' });
 
         const replyA = {
-          id: 'reply-123', commentId: 'comment-123', content: 'reply A', date: '2020',
+          id: 'reply-123', commentId: 'comment-123', content: 'reply A', date: '2020', isDeleted: false,
         };
         const replyB = {
-          id: 'reply-456', commentId: 'comment-456', content: 'reply B', date: '2021',
+          id: 'reply-456', commentId: 'comment-456', content: 'reply B', date: '2021', isDeleted: false,
         };
 
         const expectedReplies = [

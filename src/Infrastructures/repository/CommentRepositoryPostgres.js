@@ -2,6 +2,7 @@ const CommentRepository = require('../../Domains/comments/CommentRepository');
 const AddedComment = require('../../Domains/comments/entities/AddedComment');
 const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 const AuthorizationError = require('../../Commons/exceptions/AuthorizationError');
+const DetailComment = require('../../Domains/comments/entities/DetailComment');
 
 class CommentRepositoryPostgres extends CommentRepository {
   constructor(pool, idGenerator, dateGenerator) {
@@ -72,9 +73,10 @@ class CommentRepositoryPostgres extends CommentRepository {
   async getCommentsByThreadId(threadId) {
     const query = {
       text: `SELECT  comments.id,
-              CASE WHEN comments.is_deleted = TRUE THEN '**komentar telah dihapus**' else comments.content END AS content,
+              comments.content,
               comments.date, 
-              users.username
+              users.username,
+              comments.is_deleted
               FROM comments INNER JOIN users
               ON comments.owner = users.id
               WHERE comments.thread_id = $1
@@ -82,7 +84,9 @@ class CommentRepositoryPostgres extends CommentRepository {
       values: [threadId],
     };
     const result = await this._pool.query(query);
-    return result.rows;
+    return result.rows.map((entry) => new DetailComment({
+      ...entry, isDeleted: entry.is_deleted, replies: [], likeCount: 0,
+    }));
   }
 
   async checkCommentBelongsToThread({ threadId, commentId }) {

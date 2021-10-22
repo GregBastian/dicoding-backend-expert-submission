@@ -2,7 +2,7 @@ class DetailReply {
   constructor(payload) {
     this._verifyPayload(payload);
     const {
-      id, commentId, content, date, username,
+      id, commentId, content, date, username, isDeleted,
     } = payload;
 
     this.id = id;
@@ -10,6 +10,7 @@ class DetailReply {
     this.content = content;
     this.date = date;
     this.username = username;
+    this.isDeleted = isDeleted;
   }
 
   _verifyPayload(payload) {
@@ -22,13 +23,13 @@ class DetailReply {
   }
 
   _isPayloadNotContainNeededProperty({
-    id, commentId, content, date, username,
+    id, commentId, content, date, username, isDeleted,
   }) {
-    return (!id || !commentId || !content || !date || !username);
+    return (!id || !commentId || !content || !date || !username || isDeleted === undefined);
   }
 
   _isPayloadNotMeetDataTypeSpecification({
-    id, commentId, content, date, username,
+    id, commentId, content, date, username, isDeleted,
   }) {
     return (
       typeof id !== 'string'
@@ -36,6 +37,7 @@ class DetailReply {
       || typeof content !== 'string'
       || typeof date !== 'string'
       || typeof username !== 'string'
+      || typeof isDeleted !== 'boolean'
     );
   }
 }

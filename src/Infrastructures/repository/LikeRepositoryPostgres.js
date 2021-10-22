@@ -1,3 +1,4 @@
+const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 const LikeRepository = require('../../Domains/likes/LikeRepository');
 
 class LikeRepositoryPostgres extends LikeRepository {
@@ -7,37 +8,42 @@ class LikeRepositoryPostgres extends LikeRepository {
     this._idGenerator = idGenerator;
   }
 
-  async addLike(newLike) {
-    const record = await this.getLikeById(newLike);
-    const { commentId, owner } = newLike;
-    let query;
-
-    if (!record) {
-      const id = `like-${this._idGenerator(10)}`;
-
-      query = {
-        text: 'INSERT INTO likes (id, comment_id, owner) VALUES ($1, $2, $3) RETURNING 1 AS INDEX, id',
-        values: [id, commentId, owner],
-      };
-    } else {
-      query = {
-        text: 'DELETE FROM likes WHERE comment_id = $1 AND owner = $2 RETURNING -1 as INDEX, id',
-        values: [commentId, owner],
-      };
+  async checkLikeIsExists({ commentId, owner }) {
+    const query = {
+      text: 'SELECT 1 FROM likes WHERE comment_id = $1 AND owner = $2',
+      values: [commentId, owner],
+    };
+    const result = await this._pool.query(query);
+    if (result.rows.length) {
+      return true;
     }
+    return false;
+  }
+
+  async addLike(newLike) {
+    const id = `like-${this._idGenerator(10)}`;
+    const { commentId, owner } = newLike;
+
+    const query = {
+      text: 'INSERT INTO likes (id, comment_id, owner) VALUES ($1, $2, $3) RETURNING id',
+      values: [id, commentId, owner],
+    };
 
     const result = await this._pool.query(query);
     return result.rows[0];
   }
 
-  async getLikeById({ commentId, owner }) {
+  async deleteLikeByCommentIdAndOwner({ commentId, owner }) {
     const query = {
-      text: 'SELECT * FROM likes WHERE comment_id = $1 AND owner = $2',
+      text: 'DELETE FROM likes WHERE comment_id = $1 AND owner = $2 RETURNING id',
       values: [commentId, owner],
     };
 
     const result = await this._pool.query(query);
-    return result.rows[0];
+
+    if (!result.rows.length) {
+      throw new NotFoundError('tidak bisa menghapus like karena like tidak ada');
+    }
   }
 
   async getLikeCountByCommentId(commentId) {

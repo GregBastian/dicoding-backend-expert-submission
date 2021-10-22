@@ -37,6 +37,22 @@ describe('LikeRepositoryPostgres', () => {
       await pool.end();
     });
 
+    describe('checkLikeExists function', () => {
+      it('checkLikeExists should return true if like exists', async () => {
+        await LikesTableTestHelper.addLike({ id: 'like-123', commentId: 'comment-123', owner: 'user-123' });
+
+        const likeRepositoryPostgres = new LikeRepositoryPostgres(pool, {}, {});
+        const statusCheck = await likeRepositoryPostgres.checkLikeIsExists({ commentId: 'comment-123', owner: 'user-123' });
+        expect(statusCheck).toEqual(true);
+      });
+
+      it('checkLikeExists should return false if like does not exists', async () => {
+        const likeRepositoryPostgres = new LikeRepositoryPostgres(pool, {}, {});
+        const statusCheck = await likeRepositoryPostgres.checkLikeIsExists({ commentId: 'comment-456', owner: 'user-456' });
+        expect(statusCheck).toEqual(false);
+      });
+    });
+
     describe('addLike function', () => {
       it('addLike function should add database entry for said like', async () => {
         // arrange
@@ -56,7 +72,6 @@ describe('LikeRepositoryPostgres', () => {
 
         // assert
         expect(addedLike).toStrictEqual(({
-          index: 1,
           id: 'like-123',
         }));
         expect(like).toStrictEqual({
@@ -65,29 +80,21 @@ describe('LikeRepositoryPostgres', () => {
           owner: 'user-123',
         });
       });
+    });
 
-      it('addLike function should delete database entry if record already exsits', async () => {
-        // arrange
-        const newLike = new NewLike({
-          commentId: 'comment-123',
-          owner: 'user-123',
-        });
+    describe('deleteLikeByCommentIdAndOwner function', () => {
+      it('deleteLikeByCommentIdAndOwner should not throw error when deleting like', async () => {
+        await LikesTableTestHelper.addLike({ id: 'like-123', commentId: 'comment-123', owner: 'user-123' });
 
-        const likeRepositoryPostgres = new LikeRepositoryPostgres(
-          pool, {},
-        );
+        const likeRepositoryPostgres = new LikeRepositoryPostgres(pool, {}, {});
+        await expect(likeRepositoryPostgres.deleteLikeByCommentIdAndOwner({ commentId: 'comment-123', owner: 'user-123' }))
+          .resolves.not.toThrowError();
+      });
 
-        // action
-        await LikesTableTestHelper.addLike(newLike);
-        const addedLike = await likeRepositoryPostgres.addLike(newLike);
-        const like = await LikesTableTestHelper.getLikeByCommentIdAndOwner(newLike);
-
-        // assert
-        expect(addedLike).toStrictEqual(({
-          index: -1,
-          id: 'like-123',
-        }));
-        expect(like).toBeUndefined();
+      it('deleteLikeByCommentIdAndOwner should throw error when deleting non-existing like', async () => {
+        const likeRepositoryPostgres = new LikeRepositoryPostgres(pool, {}, {});
+        await expect(likeRepositoryPostgres.deleteLikeByCommentIdAndOwner({ commentId: 'comment-123', owner: 'user-123' }))
+          .rejects.toThrowError();
       });
     });
 
