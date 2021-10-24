@@ -14,14 +14,14 @@ class getThreadUseCase {
     threadDetail.comments = await this._commentRepository.getCommentsByThreadId(threadId);
     const threadReplies = await this._threadRepository.getRepliesByThreadId(threadId);
 
-    threadDetail.comments = await this._checkIsDeletedComments(threadDetail.comments);
-    threadDetail.comments = await this._getRepliesForComments(threadDetail.comments, threadReplies);
+    threadDetail.comments = this._checkIsDeletedComments(threadDetail.comments);
+    threadDetail.comments = this._getRepliesForComments(threadDetail.comments, threadReplies);
     threadDetail.comments = await this._getLikeCountForComments(threadDetail.comments);
 
     return threadDetail;
   }
 
-  async _checkIsDeletedComments(comments) {
+  _checkIsDeletedComments(comments) {
     for (let i = 0; i < comments.length; i += 1) {
       comments[i].content = comments[i].isDeleted ? '**komentar telah dihapus**' : comments[i].content;
       delete comments[i].isDeleted;
@@ -29,7 +29,7 @@ class getThreadUseCase {
     return comments;
   }
 
-  async _getRepliesForComments(comments, threadReplies) {
+  _getRepliesForComments(comments, threadReplies) {
     for (let i = 0; i < comments.length; i += 1) {
       const commentId = comments[i].id;
       comments[i].replies = threadReplies

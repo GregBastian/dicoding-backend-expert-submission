@@ -22,7 +22,7 @@ describe('GetThreadDetailUseCase', () => {
       comments: [],
     });
 
-    const expectedComments = [
+    const retrievedComments = [
       new DetailComment({
         id: 'comment-123',
         username: 'user A',
@@ -62,14 +62,6 @@ describe('GetThreadDetailUseCase', () => {
       }),
     ];
 
-    const { commentId: commentIdReplyA, ...filteredReplyDetailsA } = retrievedReplies[0];
-    const { commentId: commentIdReplyB, ...filteredReplyDetailsB } = retrievedReplies[1];
-
-    const expectedCommentsAndReplies = [
-      { ...expectedComments[0], replies: [filteredReplyDetailsA] },
-      { ...expectedComments[1], replies: [filteredReplyDetailsB] },
-    ];
-
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
     const mockLikeRepository = new LikeRepository();
@@ -80,7 +72,7 @@ describe('GetThreadDetailUseCase', () => {
       .mockImplementation(() => Promise.resolve(retrievedReplies));
 
     mockCommentRepository.getCommentsByThreadId = jest.fn()
-      .mockImplementation(() => Promise.resolve(expectedComments));
+      .mockImplementation(() => Promise.resolve(retrievedComments));
 
     mockLikeRepository.getLikeCountByCommentId = jest.fn()
       .mockImplementation(() => Promise.resolve(0));
@@ -91,12 +83,62 @@ describe('GetThreadDetailUseCase', () => {
       likeRepository: mockLikeRepository,
     });
 
+    // filtering retrievedComments to remove isDeleted and likeCount
+    const {
+      isDeleted: isDeletedCommentA,
+      likeCount: likeCountCommentA,
+      ...filteredCommentDetailsA
+    } = retrievedComments[0];
+    const {
+      isDeleted: isDeletedCommentB,
+      likeCount: likeCountCommentB,
+      ...filteredCommentDetailsB
+    } = retrievedComments[1];
+
+    // filtering retrievedReplies to removed commentId and isDeleted
+    const {
+      commentId: commentIdReplyA, isDeleted: isDeletedReplyA,
+      ...filteredReplyDetailsA
+    } = retrievedReplies[0];
+    const {
+      commentId: commentIdReplyB, isDeleted: isDeletedReplyB,
+      ...filteredReplyDetailsB
+    } = retrievedReplies[1];
+
+    const expectedCommentsAndReplies = [
+      { ...filteredCommentDetailsA, replies: [filteredReplyDetailsA] },
+      { ...filteredCommentDetailsB, replies: [filteredReplyDetailsB] },
+    ];
+
+    const expectedCommentsAndRepliesWithLikeCount = [
+      {
+        ...filteredCommentDetailsA,
+        likeCount: likeCountCommentA,
+        replies: [filteredReplyDetailsA],
+      },
+      {
+        ...filteredCommentDetailsB,
+        likeCount: likeCountCommentB,
+        replies: [filteredReplyDetailsB],
+      },
+    ];
+
+    getThreadDetailUseCase._checkIsDeletedComments = jest.fn()
+      .mockImplementation(() => [filteredCommentDetailsA, filteredCommentDetailsB]);
+
+    getThreadDetailUseCase._getRepliesForComments = jest.fn()
+      .mockImplementation(() => expectedCommentsAndReplies);
+
+    getThreadDetailUseCase._getLikeCountForComments = jest.fn()
+      .mockImplementation(() => Promise.resolve(expectedCommentsAndRepliesWithLikeCount));
+
     // action
     const useCaseResult = await getThreadDetailUseCase.execute(useCaseParam);
 
     // assert
+
     expect(useCaseResult).toEqual(new DetailThread({
-      ...expectedDetailThread, comments: expectedCommentsAndReplies,
+      ...expectedDetailThread, comments: expectedCommentsAndRepliesWithLikeCount,
     }));
     expect(mockThreadRepository.getThreadById).toBeCalledWith(useCaseParam.threadId);
     expect(mockCommentRepository.getCommentsByThreadId).toBeCalledWith(useCaseParam.threadId);
