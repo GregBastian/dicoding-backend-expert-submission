@@ -1,3 +1,5 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-param-reassign */
 /* eslint-disable no-shadow */
 class getThreadUseCase {
   constructor({ threadRepository, commentRepository, likeRepository }) {
@@ -12,28 +14,43 @@ class getThreadUseCase {
     threadDetail.comments = await this._commentRepository.getCommentsByThreadId(threadId);
     const threadReplies = await this._threadRepository.getRepliesByThreadId(threadId);
 
-    for (let i = 0; i < threadDetail.comments.length; i += 1) {
-      // modify comment content based on is_deleted status
-      threadDetail.comments[i].content = threadDetail.comments[i].isDeleted ? '**komentar telah dihapus**' : threadDetail.comments[i].content;
-      delete threadDetail.isDeleted;
+    threadDetail.comments = await this._checkIsDeletedComments(threadDetail.comments);
+    threadDetail.comments = await this._getRepliesForComments(threadDetail.comments, threadReplies);
+    threadDetail.comments = await this._getLikeCountForComments(threadDetail.comments);
 
-      // get replies
-      const commentId = threadDetail.comments[i].id;
-      threadDetail.comments[i].replies = threadReplies
+    return threadDetail;
+  }
+
+  async _checkIsDeletedComments(comments) {
+    for (let i = 0; i < comments.length; i += 1) {
+      comments[i].content = comments[i].isDeleted ? '**komentar telah dihapus**' : comments[i].content;
+      delete comments[i].isDeleted;
+    }
+    return comments;
+  }
+
+  async _getRepliesForComments(comments, threadReplies) {
+    for (let i = 0; i < comments.length; i += 1) {
+      const commentId = comments[i].id;
+      comments[i].replies = threadReplies
         .filter((reply) => reply.commentId === commentId)
         .map((reply) => {
           const { commentId, ...replyDetail } = reply;
           replyDetail.content = replyDetail.isDeleted ? '**balasan telah dihapus**' : replyDetail.content;
+          delete replyDetail.isDeleted;
           return replyDetail;
         });
+    }
+    return comments;
+  }
 
-      // get like count
-      // eslint-disable-next-line no-await-in-loop
-      threadDetail.comments[i].likeCount = await this._likeRepository
+  async _getLikeCountForComments(comments) {
+    for (let i = 0; i < comments.length; i += 1) {
+      const commentId = comments[i].id;
+      comments[i].likeCount = await this._likeRepository
         .getLikeCountByCommentId(commentId);
     }
-
-    return threadDetail;
+    return comments;
   }
 }
 
