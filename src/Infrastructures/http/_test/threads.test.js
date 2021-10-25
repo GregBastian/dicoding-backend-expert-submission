@@ -146,7 +146,9 @@ describe('endpoints concerning CRUD on threads', () => {
       await UsersTableTestHelper.addUser({ id: 'user-123', username: 'JohnDoe' });
       await UsersTableTestHelper.addUser({ id: 'user-456', username: 'JaneDoe' });
       await ThreadableTestHelper.addThread({ id: threadId, owner: 'user-123' });
-      await CommentsTableTestHelper.addComment({ id: 'comment-123', threadId, owner: 'user-123' });
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-123', threadId, owner: 'user-123', date: '2020',
+      });
       await CommentsTableTestHelper.addComment({ id: 'comment-456', threadId, owner: 'user-123' });
       await RepliesTableTestHelper.addReply({ id: 'reply-123', commentId: 'comment-456', owner: 'user-123' });
       await RepliesTableTestHelper.addReply({ id: 'reply-456', commentId: 'comment-123', owner: 'user-456' });
